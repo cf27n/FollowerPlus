@@ -1,4 +1,4 @@
-# FollowerPlus
+# FollowerPlus <img src="https://github.com/cf27n/FollowerPlus/blob/main/FollowerPlusIcon.png" width="128" height="128">
 Small plugin for Streets of Rogue that adds some extra functionality to followers for a more appealing follower-oriented playstyle.
 
 Currently in alpha. Primarily a concept project.
