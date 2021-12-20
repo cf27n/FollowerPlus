@@ -27,7 +27,7 @@ namespace FollowerPlus
             RogueLibs.LoadFromAssembly();
 
             mLog = Logger;
-            mLog.LogMessage("FollowerPlus");
+            mLog.LogInfo("Running FollowerPlus v" + pVers);
         }
     }
 
@@ -39,15 +39,13 @@ namespace FollowerPlus
         {
             if (agent.employer == interactingAgent)
             {
-                __instance.AddButton("ShowMeYourInv");
+                __instance.AddButton("ShowFollowerInv");
             }
         }
 
         public static bool AgentInteractions_PressedButton(AgentInteractions __instance, Agent agent, Agent interactingAgent, string buttonText, int buttonPrice)
         {
-            mLog.LogMessage(agent.agentName + " : " + interactingAgent.agentName);
-
-            if (buttonText == "ShowMeYourInv")
+            if (buttonText == "ShowFollowerInv")
             {
                 FollowerInventoryManagement.SetInvManagementStatus(interactingAgent, true);
                 agent.ShowNPCChest(agent.inventory, false);
@@ -55,11 +53,6 @@ namespace FollowerPlus
             } else
             {
                 FollowerInventoryManagement.SetInvManagementStatus(interactingAgent, false);
-            }
-
-            if (buttonText == "GiveItem")
-            {
-
             }
             return true;
         }
@@ -76,7 +69,7 @@ namespace FollowerPlus
                     if (__instance.agent == null || __instance.agent.interactionHelper.interactionAgent == null || !__instance.agent.worldSpaceGUI.openedNPCChest) { return; }
                     if (!FollowerInventoryManagement.IsManagingInventory(__instance.agent)) { return; }
 
-                    if (!FollowerInventoryManagement.IsBorrowedItem(__instance.item, __instance.agent, __instance.agent.interactionHelper.interactionAgent))
+                    if (!FollowerInventoryManagement.IsBorrowedItem(__instance.item, __instance.agent, __instance.agent.interactionHelper.interactionAgent)) // if this item isn't owned by the viewer, colour the slot red.
                     {
                         __instance.myImage.color = new Color32(__instance.br, 0, __instance.br, __instance.standardAlpha);
                         __instance.itemImage.color = new Color32(byte.MaxValue, byte.MaxValue, byte.MaxValue, __instance.fadedItemAlpha);
@@ -101,14 +94,15 @@ namespace FollowerPlus
             if (!FollowerInventoryManagement.IsBorrowedItem(__instance.item, __instance.agent, __instance.agent.interactionHelper.interactionAgent)) { return false; }
             if (__instance.item != null && (!__instance.item.questItem || __instance.item.questItemCanBuy) && (__instance.item.invItemName != "Money" && __instance.item.itemValue != 0))
             {
-                int num = __instance.MoveFromChestToInventory() ? 1 : 0;
+                __instance.MoveFromChestToInventory();
+                // add objectMult.TakeItemFromShop() for multiplayer?
                 FollowerInventoryManagement.RemoveBorrowedItem(__instance.item, __instance.agent, __instance.agent.interactionHelper.interactionAgent);
                 return false;
             }
             return true;
         }
 
-        public static void AgentInteractions_UseItemOnObject(Agent agent, Agent interactingAgent, InvItem item, int slotNum, string combineType, string useOnType)
+        public static void AgentInteractions_UseItemOnObject(Agent agent, Agent interactingAgent, InvItem item, int slotNum, string combineType, string useOnType) // listens to GiveItem uses and records the item being processed
         {
             if (useOnType == "GiveItem" && (agent.employer == interactingAgent || agent.formerEmployer == interactingAgent || agent.oma.mindControlled))
             {
@@ -138,7 +132,8 @@ namespace FollowerPlus
         {
             if (item == null || lender == null || borrower == null) { return false; }
             for (int i = 0; i < leasedItems.Count; i++)
-            {                if (leasedItems[i].itemName == item.invItemName && leasedItems[i].lenderID == lender.agentID && leasedItems[i].borrowerID == borrower.agentID)//(leasedItems[i].Equals(new OwnedItem(item.invItemName, lender.agentID, borrower.agentID)))
+            {
+                if (leasedItems[i].itemName == item.invItemName && leasedItems[i].lenderID == lender.agentID && leasedItems[i].borrowerID == borrower.agentID)
                 {
                     return true;
                 }
@@ -168,8 +163,6 @@ namespace FollowerPlus
         public static void SetInvManagementStatus(Agent agent, bool isUsing)
         {
             if (agent == null) { return; }
-            
-            if (usingInvManagement == null) { return; }
             
             for (int i = 0; i < usingInvManagement.Count; i++)
             {

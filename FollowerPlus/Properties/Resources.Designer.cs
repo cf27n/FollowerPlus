@@ -59,15 +59,5 @@ namespace FollowerPlus.Properties {
                 resourceCulture = value;
             }
         }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
-        internal static byte[] spytronThingo {
-            get {
-                object obj = ResourceManager.GetObject("spytronThingo", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
     }
 }
