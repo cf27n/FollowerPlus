@@ -15,15 +15,28 @@ namespace FollowerPlus
 
         public static BepInEx.Logging.ManualLogSource mLog;
 
+        private static CustomName followerInvName = RogueLibs.CreateCustomName("ShowFollowerInv", NameTypes.Interface, new CustomNameInfo
+        {
+            English = "Show Inventory",
+            Spanish = "Mostrar inventario",
+            Russian = "инвентарь",
+            Brazilian = "Exibir inventário", // "Brazilian"?
+            Chinese = "显示库存",
+            French = "Afficher l'inventaire",
+            German = "Inventar anzeigen",
+            Korean = "인벤토리 표시",
+        });
+
         public void Awake()
         {
-            RoguePatcher patcher = new RoguePatcher(this, typeof(InteractionPatches));
+            RoguePatcher patcher = new RoguePatcher(this, typeof(Patches));
             patcher.Postfix(typeof(AgentInteractions), nameof(AgentInteractions.DetermineButtons));
             patcher.Prefix(typeof(AgentInteractions), nameof(AgentInteractions.PressedButton));
             patcher.Postfix(typeof(InvSlot), nameof(InvSlot.UpdateInvSlot));
             patcher.Prefix(typeof(InvSlot), nameof(InvSlot.BuyItem));
             patcher.Postfix(typeof(AgentInteractions), nameof(AgentInteractions.UseItemOnObject), new Type[] { typeof(Agent), typeof(Agent), typeof(InvItem), typeof(int), typeof(string), typeof(string) });
-            
+            patcher.Postfix(typeof(LoadLevel), nameof(LoadLevel.loadStuff));
+
             RogueLibs.LoadFromAssembly();
 
             mLog = Logger;
@@ -31,9 +44,11 @@ namespace FollowerPlus
         }
     }
 
-    public class InteractionPatches
+    public class Patches
     {
         private static BepInEx.Logging.ManualLogSource mLog = FollowerPlusMain.mLog;
+
+        public static void LoadLevel_loadStuff() { FollowerInventoryManagement.Reset(); }
 
         public static void AgentInteractions_DetermineButtons(AgentInteractions __instance, Agent agent, Agent interactingAgent, List<string> buttons1, List<string> buttonsExtra1, List<int> buttonPrices1)
         {
@@ -128,12 +143,16 @@ namespace FollowerPlus
         private static List<OwnedItem> leasedItems = new List<OwnedItem> { };
         private static List<Agent> usingInvManagement = new List<Agent> { };
 
+        public static void Reset() { leasedItems.Clear(); usingInvManagement.Clear(); }
+
         public static bool IsBorrowedItem(InvItem item, Agent lender, Agent borrower)
         {
             if (item == null || lender == null || borrower == null) { return false; }
+            OwnedItem ownedItem = new OwnedItem(item.invItemName, lender, borrower);
+
             for (int i = 0; i < leasedItems.Count; i++)
             {
-                if (leasedItems[i].itemName == item.invItemName && leasedItems[i].lenderID == lender.agentID && leasedItems[i].borrowerID == borrower.agentID)
+                if (leasedItems[i].IsEqualTo(ownedItem))
                 {
                     return true;
                 }
@@ -144,7 +163,7 @@ namespace FollowerPlus
         public static void AddBorrowedItem(InvItem item, Agent lender, Agent borrower)
         {
             if (item == null || lender == null || borrower == null) { return; }
-            leasedItems.Add(new OwnedItem(item.invItemName, lender.agentID, borrower.agentID));
+            leasedItems.Add(new OwnedItem(item.invItemName, lender, borrower));
         }
 
         public static void RemoveBorrowedItem(InvItem item, Agent lender, Agent borrower)
@@ -152,7 +171,7 @@ namespace FollowerPlus
             if (item == null || lender == null || borrower == null) { return; }
             for (int i = 0; i < leasedItems.Count; i++)
             {
-                if (leasedItems[i].Equals(new OwnedItem(item.invItemName, lender.agentID, borrower.agentID)))
+                if (leasedItems[i].Equals(new OwnedItem(item.invItemName, lender, borrower)))
                 {
                     leasedItems.RemoveAt(i);
                     return;
@@ -199,15 +218,20 @@ namespace FollowerPlus
 
     public class OwnedItem
     {
-        public int lenderID;
-        public int borrowerID;
+        public Agent lender;
+        public Agent borrower;
         public string itemName;
 
-        public OwnedItem(string itemName, int lenderID, int borrowerID)
+        public OwnedItem(string itemName, Agent lender, Agent borrower)
         {
             this.itemName = itemName;
-            this.lenderID = lenderID;
-            this.borrowerID = borrowerID;
+            this.lender = lender;
+            this.borrower = borrower;
+        }
+
+        public bool IsEqualTo(OwnedItem compareTo)
+        {
+            return (lender == compareTo.lender && borrower == compareTo.borrower && itemName == compareTo.itemName);
         }
     }
 }
