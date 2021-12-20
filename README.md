@@ -1,7 +1,7 @@
 # FollowerPlus
 Small plugin for Streets of Rogue that adds some extra functionality to followers for a more appealing follower-oriented playstyle.
 
-Currently in alpha. Primarily a concept project.
+Currently in alpha. Made for Streets of Rogue v95.
 
 <h2>Features</h2>
 Current:
@@ -13,13 +13,16 @@ Current:
 
 Planned:
 
+- Follower Command Hotkeys
+	- Enables commands like "Attack All" or "Follow All"  remotely.
+
 - None yet
 
 <h2>Installation</h2>
 
 Requirements:
-  - [BepInEx 5.4.11.0](https://github.com/BepInEx/BepInEx/releases)
-  - [RogueLibs 3.1.2.0](https://github.com/Abbysssal/RogueLibs/releases) (both Core and Patcher)
+  - [BepInEx 5.4.11.0+](https://github.com/BepInEx/BepInEx/releases)
+  - [RogueLibs 3.1.2.0+](https://github.com/Abbysssal/RogueLibs/releases) (both Core and Patcher)
 
 Instructions:
 - [Freiling87's guide to installing mods with BepInEx](https://steamcommunity.com/sharedfiles/filedetails/?id=2271959380)
