@@ -16,8 +16,6 @@ Planned:
 - Follower Command Hotkeys
 	- Enables commands like "Attack All" or "Follow All"  remotely.
 
-- None yet
-
 <h2>Installation</h2>
 
 Requirements:
