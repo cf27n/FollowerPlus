@@ -52,7 +52,7 @@ namespace FollowerPlus
 
         public static void AgentInteractions_DetermineButtons(AgentInteractions __instance, Agent agent, Agent interactingAgent, List<string> buttons1, List<string> buttonsExtra1, List<int> buttonPrices1)
         {
-            if (agent.employer == interactingAgent)
+            if (agent.employer == interactingAgent || agent.mindControlAgent == interactingAgent)
             {
                 __instance.AddButton("ShowFollowerInv");
             }
